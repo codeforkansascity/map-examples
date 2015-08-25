@@ -1,0 +1,53 @@
+<!doctype html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Map Example</title>
+
+  <!-- Include Leaflet CSS files -->
+   <link rel="stylesheet" href="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.css" />
+
+</head>
+<body>
+  <h1>Simple Map with Data</h1>
+  <p>This example creates a map using <a href="http://leafletjs.com/">leaflet.js</a>
+    and the <a href="http://dev.socrata.com/">SODA API</a> to display data from <a href="https://data.kcmo.org/">data.kcmo.org</a>.
+
+  <!--Create the Map div -->
+  <div id='map' style="width:100%; height:500px">
+
+  <!-- Include leaflet js file -->
+  <script src="http://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.3/leaflet.js"></script>
+
+  <script>
+
+  //Define JavaScript function to execute the HTTP get request
+  function httpGet(theUrl){
+    var xmlHttp = new XMLHttpRequest();
+    xmlHttp.open( "GET", theUrl, false ); // false for synchronous request
+    xmlHttp.send( null );
+    return JSON.parse(xmlHttp.responseText);
+  }
+
+  //Define map variable using the id of the map div
+  var map = L.map('map').setView([39.0997, -94.578], 10);
+
+  //Add basemap raster tile layer
+  L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+  }).addTo(map);
+
+  //Use HTTP get function to get 2015 Crime data for KCMO (http://dev.socrata.com/foundry/#/data.kcmo.org/geta-wrqs)
+  //Note: the default limit is 1000 data points
+  var data = httpGet('https://data.kcmo.org/resource/geta-wrqs.json');
+
+  //for each data point, create a marker with the lat lon coordinates and add to the map
+  data.forEach(function(entry){
+    var marker =  L.marker([entry.location_1.coordinates[1], entry.location_1.coordinates[0]])
+      .bindPopup(entry.description + " " + entry.from_date).addTo(map);
+  });
+
+
+</script>
+</body>
+</html>
